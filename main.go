@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"go.lvjp.me/demo-backend-go/cmd"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	cmd.Execute()
 }
