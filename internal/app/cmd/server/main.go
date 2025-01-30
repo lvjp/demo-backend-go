@@ -4,20 +4,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	stdlog "log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog"
 )
 
 func Run() error {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	logger := newLogger()
+	ctx := logger.WithContext(context.Background())
+
+	stdlog.SetFlags(0)
+	stdlog.SetOutput(logger.With().Str("logger", "stdlog").Logger())
+
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	server := newFiberApp()
+	server := newFiberApp(logger)
 
 	var serverErr error
 	go func() {
@@ -27,7 +35,7 @@ func Run() error {
 	}()
 
 	<-ctx.Done()
-	log.Println("Server shutdown sequence started")
+	logger.Info().Msg("Server shutdown sequence started")
 
 	if serverErr != nil && !errors.Is(serverErr, http.ErrServerClosed) {
 		return fmt.Errorf("ListenAndServe error: %w", serverErr)
@@ -36,12 +44,12 @@ func Run() error {
 	if err := server.Shutdown(); err != nil {
 		return fmt.Errorf("could not shutdown server: %w", err)
 	}
-	log.Println("Server terminated")
+	logger.Info().Msg("Server terminated")
 
 	return nil
 }
 
-func newFiberApp() *fiber.App {
+func newFiberApp(logger *zerolog.Logger) *fiber.App {
 	app := fiber.New()
 
 	app.Hooks().OnListen(func(listenData fiber.ListenData) error {
@@ -50,13 +58,15 @@ func newFiberApp() *fiber.App {
 			scheme = "https"
 		}
 
-		log.Printf("Listening on %s://%s:%s\n", scheme, listenData.Host, listenData.Port)
+		logger.Info().
+			Str("endpoint", scheme+"://"+listenData.Host+":"+listenData.Port).
+			Msg("Listening")
 
 		return nil
 	})
 
 	app.Hooks().OnShutdown(func() error {
-		log.Println("Fiber shutdown done")
+		logger.Info().Msg("Fiber shutdown done")
 		return nil
 	})
 
@@ -65,4 +75,15 @@ func newFiberApp() *fiber.App {
 	})
 
 	return app
+}
+
+func newLogger() *zerolog.Logger {
+	output := zerolog.ConsoleWriter{
+		Out:        os.Stderr,
+		TimeFormat: time.RFC3339,
+	}
+
+	logger := zerolog.New(output).With().Timestamp().Logger()
+
+	return &logger
 }

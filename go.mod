@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	github.com/gofiber/fiber/v2 v2.52.6
+	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
 )
 
