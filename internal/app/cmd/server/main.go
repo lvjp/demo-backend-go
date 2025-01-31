@@ -11,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"go.lvjp.me/demo-backend-go/internal/pkg/requestid"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog"
 )
@@ -70,7 +72,12 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 		return nil
 	})
 
+	app.Use(requestid.Middleware())
+
 	app.Get("/", func(c *fiber.Ctx) error {
+		logger.Info().
+			Str("RequestID", requestid.MustGet(c.UserContext())).
+			Msg("Handling a request !")
 		return c.SendString("Hello, World!")
 	})
 
