@@ -73,11 +73,14 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 	})
 
 	app.Use(requestid.Middleware())
+	app.Use(func(c *fiber.Ctx) error {
+		logger := logger.With().Str("requestID", requestid.MustGet(c.UserContext())).Logger()
+		c.SetUserContext(logger.WithContext(c.UserContext()))
+		return c.Next()
+	})
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		logger.Info().
-			Str("RequestID", requestid.MustGet(c.UserContext())).
-			Msg("Handling a request !")
+		zerolog.Ctx(c.UserContext()).Info().Msg("Handling a request !")
 		return c.SendString("Hello, World!")
 	})
 
