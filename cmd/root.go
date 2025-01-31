@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"go.lvjp.me/demo-backend-go/pkg/buildinfo"
@@ -12,9 +11,6 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "demo-backend-go",
 	Version: buildinfo.Get().VersionString(),
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Hello, World!")
-	},
 }
 
 func Execute() {
