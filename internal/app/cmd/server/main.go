@@ -11,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"go.lvjp.me/demo-backend-go/internal/app/api/routes"
+	"go.lvjp.me/demo-backend-go/internal/app/misc"
 	"go.lvjp.me/demo-backend-go/pkg/requestid"
 
 	"github.com/gofiber/contrib/fiberzerolog"
@@ -83,9 +85,7 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 		Logger: logger,
 	}))
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	routes.MiscRouter(app.Group("/api/v0/misc"), misc.NewService())
 
 	return app
 }
