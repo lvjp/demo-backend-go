@@ -13,6 +13,7 @@ import (
 
 	"go.lvjp.me/demo-backend-go/internal/pkg/requestid"
 
+	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog"
 )
@@ -78,9 +79,11 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 		c.SetUserContext(logger.WithContext(c.UserContext()))
 		return c.Next()
 	})
+	app.Use(fiberzerolog.New(fiberzerolog.Config{
+		Logger: logger,
+	}))
 
 	app.Get("/", func(c *fiber.Ctx) error {
-		zerolog.Ctx(c.UserContext()).Info().Msg("Handling a request !")
 		return c.SendString("Hello, World!")
 	})
 
