@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"go.lvjp.me/demo-backend-go/internal/pkg/requestid"
+	"go.lvjp.me/demo-backend-go/pkg/requestid"
 
 	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
