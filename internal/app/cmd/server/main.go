@@ -17,6 +17,7 @@ import (
 
 	"github.com/gofiber/contrib/fiberzerolog"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/rs/zerolog"
 )
 
@@ -84,6 +85,8 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 	app.Use(fiberzerolog.New(fiberzerolog.Config{
 		Logger: logger,
 	}))
+
+	app.Use(cors.New())
 
 	routes.MiscRouter(app.Group("/api/v0/misc"), misc.NewService())
 
