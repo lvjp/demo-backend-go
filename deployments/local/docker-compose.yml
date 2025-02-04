@@ -1,0 +1,25 @@
+---
+
+name: demo-backend-go
+
+services:
+  backend:
+    build:
+      context: ../..
+      dockerfile: ./build/Dockerfile
+    restart: always
+    ports:
+      - 8081:8080
+    healthcheck:
+      test: ["CMD", "demo-backend-go", "healthcheck"]
+  swagger:
+    image: swaggerapi/swagger-ui:v5.18.2@sha256:bcac11f186d874111edc7ff2db7850eeb6bcbda383b5742a6cfc9b150e80e30d
+    restart: always
+    environment:
+      - SWAGGER_JSON=/opt/swagger.yaml
+    volumes:
+      - ../../api/openapi.yaml:/opt/swagger.yaml
+    ports:
+      - 8082:8080
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--user-agent", "local-healthcheck", "http://localhost"]

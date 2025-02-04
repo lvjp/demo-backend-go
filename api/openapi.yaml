@@ -4,7 +4,7 @@ info:
   title: demo-backend-go
   version: 0.1.0
 servers:
-  - url: '/api/v0'
+  - url: 'http://localhost:8081/api/v0'
 tags:
   - name: Miscellaneous
 paths:
