@@ -17,6 +17,7 @@ services:
     restart: always
     environment:
       - SWAGGER_JSON=/opt/swagger.yaml
+      - VALIDATOR_URL=none
     volumes:
       - ../../api/openapi.yaml:/opt/swagger.yaml
     ports:
