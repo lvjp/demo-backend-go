@@ -1,14 +1,12 @@
-package handlers
+package misc
 
 import (
-	"go.lvjp.me/demo-backend-go/internal/app/misc"
-
 	"github.com/gofiber/fiber/v2"
 )
 
-func Version(service misc.Service) fiber.Handler {
+func GetVersion(service Service) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		version := service.Version()
+		version := service.GetVersion()
 
 		output := &fiber.Map{
 			"revision": version.Revision,

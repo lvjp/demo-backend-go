@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	Version() Version
+	GetVersion() Version
 }
 
 func NewService() Service {
@@ -16,7 +16,7 @@ func NewService() Service {
 
 type impl struct{}
 
-func (*impl) Version() Version {
+func (*impl) GetVersion() Version {
 	info := buildinfo.Get()
 
 	return Version{
