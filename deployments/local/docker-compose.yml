@@ -13,7 +13,7 @@ services:
     healthcheck:
       test: ["CMD", "/app", "healthcheck"]
   swagger:
-    image: swaggerapi/swagger-ui:v5.20.1@sha256:00f66447bf0622900356f5b0c302dbdde2ca16862299307d31e61379d494b592
+    image: swaggerapi/swagger-ui:v5.20.2@sha256:24b71463bed4551c57b9ef9c8a395008e40a45dcd37bc594aaf29474c592bf58
     restart: always
     environment:
       - SWAGGER_JSON=/opt/swagger.yaml
