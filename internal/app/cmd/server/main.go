@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"go.lvjp.me/demo-backend-go/internal/app/api/auth"
 	"go.lvjp.me/demo-backend-go/internal/app/api/misc"
 	"go.lvjp.me/demo-backend-go/pkg/requestid"
 
@@ -88,6 +89,7 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 	app.Use(cors.New())
 
 	misc.Router(app.Group("/api/v0/misc"), misc.NewService())
+	auth.Router(app.Group("/api/v0/auth"), auth.NewSessionService())
 
 	return app
 }

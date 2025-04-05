@@ -6,8 +6,43 @@ info:
 servers:
   - url: 'http://localhost:8081/api/v0'
 tags:
+  - name: Authentication
   - name: Miscellaneous
+# No authentication scheme declared
+security: []
 paths:
+  /auth/session:
+    post:
+      tags:
+        - Authentication
+      summary: Create a new user session
+      description: This endpoint is used to create a new user session.
+      operationId: authNewSession
+      # No security required for this endpoint as security start here !
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: me@example.com
+                password:
+                  type: string
+                  example: pa$$w0rd
+              required:
+                - id
+                - password
+        required: true
+      responses:
+        '200':
+          description: Session successfully created
+        '400':
+          description: Bad request
+        '403':
+          description: Access denied
   /misc/version:
     get:
       tags:
