@@ -26,14 +26,14 @@ paths:
             schema:
               type: object
               properties:
-                id:
+                email:
                   type: string
                   example: me@example.com
                 password:
                   type: string
                   example: pa$$w0rd
               required:
-                - id
+                - email
                 - password
         required: true
       responses:

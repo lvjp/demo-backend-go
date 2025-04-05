@@ -7,11 +7,17 @@ services:
     build:
       context: ../..
       dockerfile: ./build/Dockerfile
+    env_file: "postgres.env"
     restart: always
     ports:
       - 8081:8080
     healthcheck:
       test: ["CMD", "/app", "healthcheck"]
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully
+      db-fill:
+        condition: service_completed_successfully
   swagger:
     image: swaggerapi/swagger-ui:v5.20.6@sha256:70b4aaa3f7087179a353b54399c88794de4d2eb6d1d85ad97fb115b0081ac3a0
     restart: always
@@ -24,3 +30,32 @@ services:
       - 8082:8080
     healthcheck:
       test: ["CMD", "curl", "--head", "--fail", "--user-agent", "local-healthcheck", "http://localhost:8080"]
+  db:
+    image: postgres:16.8-bookworm
+    restart: always
+    env_file: "postgres.env"
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+  db-migrate:
+    image: migrate/migrate:v4.18.2
+    env_file: "postgres.env"
+    entrypoint: []
+    command: migrate --path=/opt/demo-backend-go/migrate --database=postgres://db:5432?sslmode=disable --verbose up
+    volumes:
+      - ../../database/migrate:/opt/demo-backend-go/migrate
+    depends_on:
+      db:
+        condition: service_healthy
+  db-fill:
+    image: postgres:16.8-bookworm
+    env_file: "postgres.env"
+    command: psql --host db -f /opt/demo-backend-go/db-fill.sql
+    volumes:
+      - ./db-fill.sql:/opt/demo-backend-go/db-fill.sql
+    depends_on:
+      db-migrate:
+        condition: service_completed_successfully

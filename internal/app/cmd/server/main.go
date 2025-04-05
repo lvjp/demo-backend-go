@@ -13,6 +13,7 @@ import (
 
 	"go.lvjp.me/demo-backend-go/internal/app/api/auth"
 	"go.lvjp.me/demo-backend-go/internal/app/api/misc"
+	"go.lvjp.me/demo-backend-go/internal/app/db"
 	"go.lvjp.me/demo-backend-go/pkg/requestid"
 
 	"github.com/gofiber/contrib/fiberzerolog"
@@ -31,7 +32,15 @@ func Run() error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
+	conn, err := db.NewConnector()
+	if err != nil {
+		return fmt.Errorf("database connection error: %w", err)
+	}
+
 	server := newFiberApp(logger)
+
+	misc.Router(server.Group("/api/v0/misc"), misc.NewService())
+	auth.Router(server.Group("/api/v0/auth"), auth.NewSessionService(conn))
 
 	var serverErr error
 	go func() {
@@ -87,9 +96,6 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 	}))
 
 	app.Use(cors.New())
-
-	misc.Router(app.Group("/api/v0/misc"), misc.NewService())
-	auth.Router(app.Group("/api/v0/auth"), auth.NewSessionService())
 
 	return app
 }

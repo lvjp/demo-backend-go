@@ -18,8 +18,8 @@ func SessionCreate(service SessionService) fiber.Handler {
 			return nil
 		}
 
-		if err := service.Create(input); errors.Is(err, ErrAccessDenied) {
-			c.Status(fiber.StatusUnauthorized)
+		if err := service.Create(c.UserContext(), input); errors.Is(err, ErrAccessDenied) {
+			c.Status(fiber.StatusForbidden)
 			return nil
 		} else if err != nil {
 			zerolog.Ctx(c.UserContext()).Error().Err(err).Msg("Session creation error")
