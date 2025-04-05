@@ -31,7 +31,7 @@ services:
     healthcheck:
       test: ["CMD", "curl", "--head", "--fail", "--user-agent", "local-healthcheck", "http://localhost:8080"]
   db:
-    image: postgres:16.8-bookworm
+    image: postgres:16.8-bookworm@sha256:e95b0cb95f719e0ce156c2bc5545c89fbd98a1a692845a5331ddc79ea61f1b1e
     restart: always
     env_file: "postgres.env"
     healthcheck:
@@ -41,7 +41,7 @@ services:
       retries: 5
       start_period: 10s
   db-migrate:
-    image: migrate/migrate:v4.18.2
+    image: migrate/migrate:v4.18.2@sha256:acded13a336f2b6f35fd9ce14a32834cf1e6b2a7887fe5dfc977b3e563eba39e
     env_file: "postgres.env"
     entrypoint: []
     command: migrate --path=/opt/demo-backend-go/migrate --database=postgres://db:5432?sslmode=disable --verbose up
@@ -51,7 +51,7 @@ services:
       db:
         condition: service_healthy
   db-fill:
-    image: postgres:16.8-bookworm
+    image: postgres:16.8-bookworm@sha256:e95b0cb95f719e0ce156c2bc5545c89fbd98a1a692845a5331ddc79ea61f1b1e
     env_file: "postgres.env"
     command: psql --host db -f /opt/demo-backend-go/db-fill.sql
     volumes:
