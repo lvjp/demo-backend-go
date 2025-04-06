@@ -18,6 +18,7 @@ func TestNewString(t *testing.T) {
 		name string
 		raw  string
 		phc  *String
+		err  string
 	}{
 		{
 			name: "full",
@@ -101,15 +102,34 @@ func TestNewString(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "illegal format",
+			raw:  "---",
+			err:  "not valid PHC string format",
+		},
+		{
+			name: "salt decoding error",
+			raw:  "$argon2id$v=19$m=65536,t=2,p=1$---$CWOrkoo7oJBQ/iyh7uJ0LO2aLEfrHwTWllSAxT0zRno",
+			err:  "salt decoding error",
+		},
+		{
+			name: "hash decoding error",
+			raw:  "$argon2id$v=19$m=65536,t=2,p=1$gZiV/M1gPc22ElAH/Jh1Hw$---",
+			err:  "hash decoding error",
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			actual, err := NewString(tc.raw)
-			require.NoError(t, err)
-
-			require.Equal(t, tc.phc, actual)
-			require.Equal(t, tc.raw, actual.String())
+			if tc.err != "" {
+				require.ErrorContains(t, err, tc.err)
+				require.Nil(t, actual)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.phc, actual)
+				require.Equal(t, tc.raw, actual.String())
+			}
 		})
 	}
 }
