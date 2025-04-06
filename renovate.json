@@ -15,5 +15,14 @@
         "# renovate: datasource=(?<datasource>.+) depName=(?<depName>.+)\\s+\\w+: \\s?(?<currentValue>.+)"
       ]
     }
+  ],
+  "packageRules": [
+    {
+      "description": "Stick to Scaleway serverless SQL version",
+      "matchFileNames": ["deployments/local/docker-compose.yml"],
+      "matchPackageNames": ["/postgres/"],
+      "matchManagers": ["docker-compose"],
+      "enabled": false
+    }
   ]
 }
