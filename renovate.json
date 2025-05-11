@@ -35,6 +35,12 @@
         "docker-compose"
       ],
       "enabled": false
+    },
+    {
+      "matchManagers": ["gomod"],
+      "matchDepNames": ["go"],
+      "matchDepTypes": ["golang"],
+      "rangeStrategy": "bump"
     }
   ]
 }
