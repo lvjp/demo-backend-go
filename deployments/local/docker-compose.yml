@@ -41,7 +41,7 @@ services:
       retries: 5
       start_period: 10s
   db-migrate:
-    image: migrate/migrate:v4.18.2@sha256:acded13a336f2b6f35fd9ce14a32834cf1e6b2a7887fe5dfc977b3e563eba39e
+    image: migrate/migrate:v4.18.3@sha256:39b59b389634e43bb3f2d4e94bc1edef0775ec2a9a3540ce6a2cf330e5daae55
     env_file: "postgres.env"
     entrypoint: []
     command: migrate --path=/opt/demo-backend-go/migrate --database=postgres://db:5432?sslmode=disable --verbose up
