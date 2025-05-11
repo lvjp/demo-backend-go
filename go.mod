@@ -1,6 +1,6 @@
 module go.lvjp.me/demo-backend-go
 
-go 1.24.1
+go 1.24.3
 
 require (
 	github.com/gofiber/contrib/fiberzerolog v1.0.3
