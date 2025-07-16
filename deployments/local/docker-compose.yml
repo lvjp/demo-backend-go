@@ -19,7 +19,7 @@ services:
       db-fill:
         condition: service_completed_successfully
   swagger:
-    image: swaggerapi/swagger-ui:v5.26.2@sha256:13e9885605519c4ecbe06854e212b10fce703e3c233771de5e58571e459eb9a8
+    image: swaggerapi/swagger-ui:v5.27.0@sha256:fb5712e95effab4479ef8c80d2b0bcada26e4ebfdac29f4b3c3b95b8276aeb1f
     restart: always
     environment:
       - SWAGGER_JSON=/opt/swagger.yaml
