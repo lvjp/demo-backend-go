@@ -11,7 +11,7 @@ RUN --mount=type=bind,target=.,readonly \
     --mount=type=cache,target=/go/pkg/mod \
     go mod download -x && CGO_ENABLED=0 go build -o /go/bin/app .
 
-FROM gcr.io/distroless/static-debian13:nonroot@sha256:30632f208e79a7564f70a60758e658d050d1747495762c2a7af0e56b6a47a2b8
+FROM gcr.io/distroless/static-debian13:nonroot@sha256:b5b9fd04c8dcf72a173183c0b7dee47e053e002246b308a59f3441db7b8b9cc4
 
 COPY --from=build /go/bin/app /
 CMD ["/app", "server"]
