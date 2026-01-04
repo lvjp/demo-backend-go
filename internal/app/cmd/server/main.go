@@ -32,7 +32,7 @@ func Run() error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	conn, err := db.NewConnector()
+	conn, err := db.NewConnector(ctx)
 	if err != nil {
 		return fmt.Errorf("database connection error: %w", err)
 	}
