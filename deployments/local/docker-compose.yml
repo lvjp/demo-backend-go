@@ -18,6 +18,8 @@ services:
         condition: service_completed_successfully
       db-fill:
         condition: service_completed_successfully
+    volumes:
+      - ./config.yaml:/var/opt/demo-backend-go/config.yaml:ro
   swagger:
     image: swaggerapi/swagger-ui:v5.31.0@sha256:080804ac62c9d5d358662cc6f0db96ba0be76af7af393014a1a1305d967298cc
     restart: always

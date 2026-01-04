@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	stdlog "log"
 	"net/http"
 	"os"
@@ -13,6 +14,7 @@ import (
 
 	"go.lvjp.me/demo-backend-go/internal/app/api/auth"
 	"go.lvjp.me/demo-backend-go/internal/app/api/misc"
+	"go.lvjp.me/demo-backend-go/internal/app/config"
 	"go.lvjp.me/demo-backend-go/internal/app/db"
 	"go.lvjp.me/demo-backend-go/pkg/requestid"
 
@@ -22,8 +24,16 @@ import (
 	"github.com/rs/zerolog"
 )
 
+const DefaultConfigPath = "/var/opt/demo-backend-go/config.yaml"
+
 func Run() error {
-	logger := newLogger()
+	config, err := config.Load(DefaultConfigPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "cannot load configuration: %v\n", err)
+		os.Exit(1)
+	}
+
+	logger := newLogger(config.Log)
 	ctx := logger.WithContext(context.Background())
 
 	stdlog.SetFlags(0)
@@ -32,7 +42,7 @@ func Run() error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	conn, err := db.NewConnector(ctx)
+	conn, err := db.NewConnector(ctx, config.Database)
 	if err != nil {
 		return fmt.Errorf("database connection error: %w", err)
 	}
@@ -46,7 +56,7 @@ func Run() error {
 	go func() {
 		defer cancel()
 
-		serverErr = server.Listen(":8080")
+		serverErr = server.Listen(*config.Server.ListenAddress)
 	}()
 
 	<-ctx.Done()
@@ -100,13 +110,24 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 	return app
 }
 
-func newLogger() *zerolog.Logger {
-	output := zerolog.ConsoleWriter{
-		Out:        os.Stderr,
-		TimeFormat: time.RFC3339,
+func newLogger(config config.Log) *zerolog.Logger {
+	var writer io.Writer = os.Stderr
+
+	if config.Format != nil {
+		switch *config.Format {
+		case "json":
+			// default is json, do nothing
+		case "console":
+			writer = zerolog.ConsoleWriter{
+				Out:        os.Stderr,
+				TimeFormat: time.RFC3339,
+			}
+		default:
+			fmt.Fprintf(os.Stderr, "unknown log format %q, defaulting to json\n", *config.Format)
+		}
 	}
 
-	logger := zerolog.New(output).With().Timestamp().Logger()
+	logger := zerolog.New(writer).With().Timestamp().Logger()
 
 	return &logger
 }

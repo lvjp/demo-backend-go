@@ -1,0 +1,12 @@
+server:
+  listen_address: ":8080"
+
+log:
+  level: debug
+  format: console
+
+database:
+  host: db
+  port: 5432
+  user: demouser
+  password: demopassword
