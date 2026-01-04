@@ -9,6 +9,8 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+const DefaultConfigPath = "/var/opt/demo-backend-go/config.yaml"
+
 type Config struct {
 	Server   Server
 	Log      Log
@@ -32,8 +34,8 @@ type Database struct {
 	Password *string `validate:"omitempty,min=1"`
 }
 
-func Load(path string) (*Config, error) {
-	raw, err := os.ReadFile(path)
+func Load() (*Config, error) {
+	raw, err := os.ReadFile(DefaultConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("config file reading: %w", err)
 	}

@@ -24,10 +24,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const DefaultConfigPath = "/var/opt/demo-backend-go/config.yaml"
-
 func Run() error {
-	config, err := config.Load(DefaultConfigPath)
+	config, err := config.Load()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "cannot load configuration: %v\n", err)
 		os.Exit(1)
