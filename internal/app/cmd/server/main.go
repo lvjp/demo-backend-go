@@ -4,17 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
-	stdlog "log"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
+	"slices"
 	"syscall"
-	"time"
 
 	"go.lvjp.me/demo-backend-go/internal/app/api/auth"
 	"go.lvjp.me/demo-backend-go/internal/app/api/misc"
-	"go.lvjp.me/demo-backend-go/internal/app/config"
+	"go.lvjp.me/demo-backend-go/internal/app/appcontext"
 	"go.lvjp.me/demo-backend-go/internal/app/db"
 	"go.lvjp.me/demo-backend-go/pkg/requestid"
 
@@ -24,28 +24,26 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func Run() error {
-	config, err := config.Load()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "cannot load configuration: %v\n", err)
-		os.Exit(1)
-	}
+func Run(ctx *appcontext.AppContext) error {
+	defer func() {
+		ctx.Logger.Info().Msg("Server terminated")
+	}()
 
-	logger := newLogger(config.Log)
-	ctx := logger.WithContext(context.Background())
-
-	stdlog.SetFlags(0)
-	stdlog.SetOutput(logger.With().Str("logger", "stdlog").Logger())
-
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	var cancel context.CancelFunc
+	ctx.Context, cancel = signal.NotifyContext(ctx.Context, os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	conn, err := db.NewConnector(ctx, config.Database)
+	conn, err := db.NewConnector(ctx, ctx.Config.Database)
 	if err != nil {
-		return fmt.Errorf("database connection error: %w", err)
+		return fmt.Errorf("database connection error: %v", err)
 	}
+	defer func() {
+		if err := conn.Close(); err != nil {
+			ctx.Logger.Warn().Err(err).Msg("Could not close database connection")
+		}
+	}()
 
-	server := newFiberApp(logger)
+	server := newFiberApp(&ctx.Logger)
 
 	misc.Router(server.Group("/api/v0/misc"), misc.NewService())
 	auth.Router(server.Group("/api/v0/auth"), auth.NewSessionService(conn))
@@ -54,20 +52,19 @@ func Run() error {
 	go func() {
 		defer cancel()
 
-		serverErr = server.Listen(*config.Server.ListenAddress)
+		serverErr = server.Listen(*ctx.Config.Server.ListenAddress)
 	}()
 
 	<-ctx.Done()
-	logger.Info().Msg("Server shutdown sequence started")
+	ctx.Logger.Info().Msg("Server shutdown sequence started")
 
 	if serverErr != nil && !errors.Is(serverErr, http.ErrServerClosed) {
-		return fmt.Errorf("ListenAndServe error: %w", serverErr)
+		return fmt.Errorf("ListenAndServe error: %v", serverErr)
 	}
 
 	if err := server.Shutdown(); err != nil {
-		return fmt.Errorf("could not shutdown server: %w", err)
+		return fmt.Errorf("could not shutdown server: %v", err)
 	}
-	logger.Info().Msg("Server terminated")
 
 	return nil
 }
@@ -76,13 +73,17 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 	app := fiber.New()
 
 	app.Hooks().OnListen(func(listenData fiber.ListenData) error {
-		scheme := "http"
+		u := url.URL{
+			Scheme: "http",
+			Host:   net.JoinHostPort(listenData.Host, listenData.Port),
+		}
+
 		if listenData.TLS {
-			scheme = "https"
+			u.Scheme = "https"
 		}
 
 		logger.Info().
-			Str("endpoint", scheme+"://"+listenData.Host+":"+listenData.Port).
+			Stringer("endpoint", &u).
 			Msg("Listening")
 
 		return nil
@@ -94,38 +95,13 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 	})
 
 	app.Use(requestid.Middleware())
-	app.Use(func(c *fiber.Ctx) error {
-		logger := logger.With().Str("requestID", requestid.MustGet(c.UserContext())).Logger()
-		c.SetUserContext(logger.WithContext(c.UserContext()))
-		return c.Next()
-	})
+
 	app.Use(fiberzerolog.New(fiberzerolog.Config{
 		Logger: logger,
+		Fields: slices.Concat([]string{fiberzerolog.FieldRequestID}, fiberzerolog.ConfigDefault.Fields),
 	}))
 
 	app.Use(cors.New())
 
 	return app
-}
-
-func newLogger(config config.Log) *zerolog.Logger {
-	var writer io.Writer = os.Stderr
-
-	if config.Format != nil {
-		switch *config.Format {
-		case "json":
-			// default is json, do nothing
-		case "console":
-			writer = zerolog.ConsoleWriter{
-				Out:        os.Stderr,
-				TimeFormat: time.RFC3339,
-			}
-		default:
-			fmt.Fprintf(os.Stderr, "unknown log format %q, defaulting to json\n", *config.Format)
-		}
-	}
-
-	logger := zerolog.New(writer).With().Timestamp().Logger()
-
-	return &logger
 }

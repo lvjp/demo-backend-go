@@ -22,8 +22,8 @@ type Server struct {
 }
 
 type Log struct {
-	Level  *string `validate:"omitempty,oneofci=trace debug info warn error fatal panic"`
-	Format *string `validate:"omitempty,oneof=console json"`
+	Level  string `validate:"omitempty,oneofci=trace debug info warn error fatal panic"`
+	Format string `validate:"omitempty,oneof=console json"`
 }
 
 type Database struct {
@@ -34,7 +34,7 @@ type Database struct {
 func Load() (*Config, error) {
 	raw, err := os.ReadFile(DefaultConfigPath)
 	if err != nil {
-		return nil, fmt.Errorf("config file reading: %w", err)
+		return nil, fmt.Errorf("config file reading: %v", err)
 	}
 
 	dec := yaml.NewDecoder(
@@ -47,12 +47,12 @@ func Load() (*Config, error) {
 	setDefaults(&ret)
 
 	if err := dec.Decode(&ret); err != nil {
-		return nil, fmt.Errorf("config file parsing: %w", err)
+		return nil, fmt.Errorf("config file parsing: %v", err)
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(&ret); err != nil {
-		return nil, fmt.Errorf("config file parsing: %w", err)
+		return nil, fmt.Errorf("config file validation: %v", err)
 	}
 
 	return &ret, nil
@@ -63,12 +63,10 @@ func setDefaults(cfg *Config) {
 		defaultAddr := ":8080"
 		cfg.Server.ListenAddress = &defaultAddr
 	}
-	if cfg.Log.Level == nil {
-		defaultLevel := "info"
-		cfg.Log.Level = &defaultLevel
+	if cfg.Log.Level == "" {
+		cfg.Log.Level = "info"
 	}
-	if cfg.Log.Format == nil {
-		defaultFormat := "json"
-		cfg.Log.Format = &defaultFormat
+	if cfg.Log.Format == "" {
+		cfg.Log.Format = "json"
 	}
 }

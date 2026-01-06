@@ -27,6 +27,7 @@ func SessionCreate(service SessionService) fiber.Handler {
 			return nil
 		}
 
+		zerolog.Ctx(c.UserContext()).Info().Msg("Session created")
 		c.Status(fiber.StatusOK)
 		return nil
 	}

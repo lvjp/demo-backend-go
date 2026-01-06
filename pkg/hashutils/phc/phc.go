@@ -57,12 +57,12 @@ func NewString(raw string) (*String, error) {
 		var err error
 		phc.Salt, err = base64.RawStdEncoding.DecodeString(submatches[4])
 		if err != nil {
-			return nil, fmt.Errorf("salt decoding error: %w", err)
+			return nil, fmt.Errorf("salt decoding error: %v", err)
 		}
 		if len(submatches[5]) > 0 {
 			phc.Hash, err = base64.RawStdEncoding.DecodeString(submatches[5])
 			if err != nil {
-				return nil, fmt.Errorf("hash decoding error: %w", err)
+				return nil, fmt.Errorf("hash decoding error: %v", err)
 			}
 		}
 	}

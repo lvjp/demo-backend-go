@@ -83,17 +83,17 @@ func NewParams(phc *phc.String) (*Params, error) {
 
 	memory, err := strconv.ParseUint(phc.Params[0].Value, 10, 32)
 	if err != nil {
-		return nil, fmt.Errorf("memory parameter decode error: %w", err)
+		return nil, fmt.Errorf("memory parameter decode error: %v", err)
 	}
 
 	time, err := strconv.ParseUint(phc.Params[1].Value, 10, 32)
 	if err != nil {
-		return nil, fmt.Errorf("time parameter decode error: %w", err)
+		return nil, fmt.Errorf("time parameter decode error: %v", err)
 	}
 
 	parallelism, err := strconv.ParseUint(phc.Params[2].Value, 10, 8)
 	if err != nil {
-		return nil, fmt.Errorf("parallelims parameter decode error: %w", err)
+		return nil, fmt.Errorf("parallelims parameter decode error: %v", err)
 	}
 
 	// uint32 overflow check

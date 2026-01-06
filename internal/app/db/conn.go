@@ -24,16 +24,15 @@ type connector struct {
 func NewConnector(ctx context.Context, cfg config.Database) (Connector, error) {
 	db, err := sql.Open(cfg.DriverName, cfg.DataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("db connector creation: %w", err)
+		return nil, fmt.Errorf("db connector creation: %v", err)
 	}
 
-	if pingErr := db.PingContext(ctx); pingErr != nil {
-		retErr := fmt.Errorf("db connection ping: %w", pingErr)
-		if closeErr := db.Close(); closeErr != nil {
-			return nil, errors.Join(closeErr, fmt.Errorf("could not close db: %w", closeErr))
-		}
-
-		return nil, retErr
+	if err := db.PingContext(ctx); err != nil {
+		return nil,
+			errors.Join(
+				fmt.Errorf("db connection ping: %v", err),
+				(&connector{db: db}).Close(),
+			)
 	}
 
 	return &connector{
@@ -49,7 +48,7 @@ func (c *connector) UserDAO() UserDAO {
 
 func (c *connector) Close() error {
 	if err := c.db.Close(); err != nil {
-		return fmt.Errorf("closing db connection: %w", err)
+		return fmt.Errorf("closing db connection: %v", err)
 	}
 
 	return nil
