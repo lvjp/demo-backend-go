@@ -6,7 +6,5 @@ log:
   format: console
 
 database:
-  host: db
-  port: 5432
-  user: demouser
-  password: demopassword
+  driver_name: postgres
+  data_source_name: postgres://db?sslmode=disable

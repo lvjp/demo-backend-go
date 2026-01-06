@@ -2,9 +2,8 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"errors"
-
-	"github.com/jackc/pgx/v5"
 )
 
 var ErrUserNotFound = errors.New("user not found")
@@ -20,16 +19,16 @@ type UserDAO interface {
 }
 
 type userDAOImpl struct {
-	conn *pgx.Conn
+	db *sql.DB
 }
 
 func (dao *userDAOImpl) GetByEmail(ctx context.Context, email string) (*User, error) {
 	var user User
 
-	err := dao.conn.QueryRow(ctx, "SELECT id, email, password FROM users WHERE email=$1", email).
+	err := dao.db.QueryRowContext(ctx, "SELECT id, email, password FROM users WHERE email=$1", email).
 		Scan(&user.ID, &user.Email, &user.PasswordHash)
 	switch {
-	case errors.Is(err, pgx.ErrNoRows):
+	case errors.Is(err, sql.ErrNoRows):
 		return nil, ErrUserNotFound
 	case err != nil:
 		return nil, err

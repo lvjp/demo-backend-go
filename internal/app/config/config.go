@@ -27,11 +27,8 @@ type Log struct {
 }
 
 type Database struct {
-	Host     *string `validate:"omitnil,hostname|ip"`
-	Port     *uint16 `validate:"omitnil,port"`
-	Database *string `validate:"omitempty,min=1"`
-	User     *string `validate:"omitempty,min=1"`
-	Password *string `validate:"omitempty,min=1"`
+	DriverName     string `yaml:"driver_name" validate:"required"`
+	DataSourceName string `yaml:"data_source_name" validate:"required"`
 }
 
 func Load() (*Config, error) {
