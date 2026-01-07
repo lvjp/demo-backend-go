@@ -1,0 +1,39 @@
+---
+name: "GitHub Pages"
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read # to checkout the source code
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
+
+    steps:
+      - name: Install mdbook
+        run: cargo install mdbook@0.5.2 # renovate: datasource=crates.io
+
+      - name: Install mdbookmermaid
+        run: cargo install mdbook-mermaid@0.17.0 # renovate: datasource=crates.io
+
+      - name: Checkout Code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Build the book
+        run: mdbook build ./docs
+
+      - name: Generate GitHub Pages artifact
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        with:
+          path: ./docs/book
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

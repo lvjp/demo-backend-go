@@ -1,0 +1,10 @@
+[book]
+title = "demo-backend-go"
+authors = ["Laurent VERDOÏA"]
+language = "en"
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output.html]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]

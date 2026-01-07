@@ -9,7 +9,11 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+// ANCHOR: default_config_path
+
 const DefaultConfigPath = "/var/opt/demo-backend-go/config.yaml"
+
+// ANCHOR_END: default_config_path
 
 type Config struct {
 	Server   Server
