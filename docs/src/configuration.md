@@ -18,11 +18,11 @@ This is the actual configuration file used for the local deployment.
   : Address used to listen for incoming HTTP requests with [fiber/App.Listen][fiber/App.Listen].
 
 `log.level`:
-  : Level used for logging.
+  : Level used for logging.  
     Valid values: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`
 
 `log.format`:
-  : Logging output format.
+  : Logging output format.  
     Valid values :
     - `json`: JSON formatted output
     - `console`: Shiny debugging colored output for console
