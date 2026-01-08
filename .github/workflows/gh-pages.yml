@@ -17,11 +17,13 @@ jobs:
       id-token: write # to verify the deployment originates from an appropriate source
 
     steps:
+      - uses: cargo-bins/cargo-binstall@80aaafe04903087c333980fa2686259ddd34b2d9 # v1.16.6
+
       - name: Install mdbook
-        run: cargo install mdbook@0.5.2 # renovate: datasource=crate
+        run: cargo binstall mdbook@0.5.2 # renovate dependency
 
       - name: Install mdbookmermaid
-        run: cargo install mdbook-mermaid@0.17.0 # renovate: datasource=crate
+        run: cargo binstall mdbook-mermaid@0.17.0 # renovate dependency
 
       - name: Checkout Code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1

@@ -25,11 +25,12 @@
     {
       "customType": "regex",
       "description": "cargo install from GitHub Actions workflow",
+      "datasourceTemplate": "crate",
       "managerFilePatterns": [
         "/^\\.github/workflows/gh-pages\\.yml$/"
       ],
       "matchStrings": [
-        "cargo install (?<depName>.+)@(?<currentValue>.+) # renovate: datasource=(?<datasource>.+)"
+        "cargo binstall (?<depName>.+)@(?<currentValue>.+) # renovate dependency"
       ]
     }
   ],
