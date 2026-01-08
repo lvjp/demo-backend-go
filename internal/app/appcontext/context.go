@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	stdlog "log"
-	"log/slog"
 	"time"
 
 	"go.lvjp.me/demo-backend-go/internal/app/config"
@@ -81,11 +80,9 @@ func (ctx *AppContext) initLogger() error {
 			Msg("unknown log format, defaulting to json")
 	}
 
-	stdlog.SetFlags(0)
+	// Remove date/time flags which are already present in zerolog output
+	stdlog.SetFlags(stdlog.Flags() & ^(stdlog.Ldate | stdlog.Ltime | stdlog.Lmicroseconds))
 	stdlog.SetOutput(ctx.Logger.With().Str("level", "stdlog").Logger())
-
-	stdlog.Println("package log initialized")
-	slog.Info("package slog initialized")
 
 	return nil
 }
