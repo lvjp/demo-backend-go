@@ -14,12 +14,22 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Manage dependencies in GitHub Actions linting workflow",
+      "description": "GitHub Actions linting workflow",
       "managerFilePatterns": [
         "/^\\.github/workflows/linting\\.yml$/"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.+) depName=(?<depName>.+)\\s+\\w+: \\s?(?<currentValue>.+)"
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "cargo install from GitHub Actions workflow",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/gh-pages\\.yml$/"
+      ],
+      "matchStrings": [
+        "cargo install (?<depName>.+)@(?<currentValue>.+) # renovate: datasource=(?<datasource>.+)"
       ]
     }
   ],
