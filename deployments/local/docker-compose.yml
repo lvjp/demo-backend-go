@@ -52,11 +52,11 @@ services:
       db:
         condition: service_healthy
   db-fill:
-    image: postgres:16.8-bookworm@sha256:e95b0cb95f719e0ce156c2bc5545c89fbd98a1a692845a5331ddc79ea61f1b1e
+    image: migrate/migrate:v4.19.1@sha256:cc4ad8e19d66791e3689405d9a028ce6e9614f32032db14acda1469f7201d6e4
     env_file: "postgres.env"
-    command: psql --host db -f /opt/demo-backend-go/db-fill.sql
+    command: --path=/opt/demo-backend-go/migrate --database="postgres://db:5432?sslmode=disable&x-migrations-table=schema_migration_filler" --verbose up
     volumes:
-      - ./db-fill.sql:/opt/demo-backend-go/db-fill.sql
+      - ./database:/opt/demo-backend-go/migrate
     depends_on:
       db-migrate:
         condition: service_completed_successfully
