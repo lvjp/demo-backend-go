@@ -45,8 +45,7 @@ services:
   db-migrate:
     image: migrate/migrate:v4.19.1@sha256:cc4ad8e19d66791e3689405d9a028ce6e9614f32032db14acda1469f7201d6e4
     env_file: "postgres.env"
-    entrypoint: []
-    command: migrate --path=/opt/demo-backend-go/migrate --database=postgres://db:5432?sslmode=disable --verbose up
+    command: --path=/opt/demo-backend-go/migrate --database=postgres://db:5432?sslmode=disable --verbose up
     volumes:
       - ../../database/migrate:/opt/demo-backend-go/migrate
     depends_on:
