@@ -16,9 +16,9 @@ const DefaultConfigPath = "/var/opt/demo-backend-go/config.yaml"
 // ANCHOR_END: default_config_path
 
 type Config struct {
-	Server   Server
-	Log      Log
-	Database Database
+	Server   Server   `yaml:"server"`
+	Log      Log      `yaml:"log"`
+	Database Database `yaml:"database"`
 }
 
 type Server struct {
