@@ -1,5 +1,4 @@
 ---
-
 name: demo-backend-go
 
 services:
@@ -7,16 +6,14 @@ services:
     build:
       context: ../..
       dockerfile: ./build/Dockerfile
-    env_file: "postgres.env"
+    env_file: "database/globals.env"
     restart: always
     ports:
       - 8081:8080
     healthcheck:
       test: ["CMD", "/app", "healthcheck"]
     depends_on:
-      db-migrate:
-        condition: service_completed_successfully
-      db-fill:
+      db-testdata:
         condition: service_completed_successfully
     volumes:
       - ./config.yaml:/var/opt/demo-backend-go/config.yaml:ro
@@ -31,32 +28,41 @@ services:
     ports:
       - 8082:8080
     healthcheck:
-      test: ["CMD", "curl", "--head", "--fail", "--user-agent", "local-healthcheck", "http://localhost:8080"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "--head",
+          "--fail",
+          "--user-agent",
+          "local-healthcheck",
+          "http://localhost:8080",
+        ]
   db:
     image: postgres:16.8-bookworm@sha256:e95b0cb95f719e0ce156c2bc5545c89fbd98a1a692845a5331ddc79ea61f1b1e
     restart: always
-    env_file: "postgres.env"
+    env_file: "database/globals.env"
     healthcheck:
       test: ["CMD", "pg_isready"]
       interval: 10s
       timeout: 10s
       retries: 5
       start_period: 10s
-  db-migrate:
+  db-schema:
     image: migrate/migrate:v4.19.1@sha256:cc4ad8e19d66791e3689405d9a028ce6e9614f32032db14acda1469f7201d6e4
-    env_file: "postgres.env"
-    command: --path=/opt/demo-backend-go/migrate --database=postgres://db:5432?sslmode=disable --verbose up
+    env_file: "database/globals.env"
+    command: --path=/opt/demo-backend-go/database/schema --database=postgres://db:5432?sslmode=disable --verbose up
     volumes:
-      - ../../database/migrate:/opt/demo-backend-go/migrate
+      - ../../database/schema:/opt/demo-backend-go/database/schema
     depends_on:
       db:
         condition: service_healthy
-  db-fill:
+  db-testdata:
     image: migrate/migrate:v4.19.1@sha256:cc4ad8e19d66791e3689405d9a028ce6e9614f32032db14acda1469f7201d6e4
-    env_file: "postgres.env"
-    command: --path=/opt/demo-backend-go/migrate --database="postgres://db:5432?sslmode=disable&x-migrations-table=schema_migration_filler" --verbose up
+    env_file: "database/globals.env"
+    command: --path=/opt/demo-backend-go/database/schema --database="postgres://db:5432?sslmode=disable&x-migrations-table=schema_migration_filler" --verbose up
     volumes:
-      - ./database:/opt/demo-backend-go/migrate
+      - ./database/schema:/opt/demo-backend-go/database/schema
     depends_on:
-      db-migrate:
+      db-schema:
         condition: service_completed_successfully
