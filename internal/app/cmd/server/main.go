@@ -38,8 +38,8 @@ func Run(ctx *appcontext.AppContext) error {
 		return fmt.Errorf("database connection error: %v", err)
 	}
 	defer func() {
-		if err := conn.Close(); err != nil {
-			ctx.Logger.Warn().Err(err).Msg("Could not close database connection")
+		if closeErr := conn.Close(); closeErr != nil {
+			ctx.Logger.Warn().Err(closeErr).Msg("Could not close database connection")
 		}
 	}()
 

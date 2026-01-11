@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 var ErrUserNotFound = errors.New("user not found")
@@ -31,7 +32,7 @@ func (dao *userDAOImpl) GetByEmail(ctx context.Context, email string) (*User, er
 	case errors.Is(err, sql.ErrNoRows):
 		return nil, ErrUserNotFound
 	case err != nil:
-		return nil, err
+		return nil, fmt.Errorf("db user retrieve: %v", err)
 	default:
 		return &user, nil
 	}
